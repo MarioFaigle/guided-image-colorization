@@ -1,0 +1,70 @@
+################
+# Input pipeline
+################
+
+# Choose one of: 'imagenet_64x64', 'imagenet'.
+load.name = 'imagenet'
+
+# The directory of the dataset.
+load.data_dir = '/data/public/tensorflow_datasets/'
+
+# Data augmentation parameters.
+augment.random_flip_left_right = True
+
+# The size of a minibatch of the training, validation dataset.
+prepare.batch_size = 64
+
+# The buffer size for the shuffling of the training dataset.
+prepare.shuffle_buffer = 78
+
+###############
+# Architectures
+###############
+
+# unet
+unet.base_filters = 48
+unet.depth = 4
+unet.width = 10
+
+# disc
+disc.base_filters = 48
+disc.depth = 4
+
+# blocks
+decoder_block.skip_mode = 'concat'
+encoder_block.batch_norm = False
+bottleneck_block.batch_norm = False
+decoder_block.batch_norm = False
+
+##########
+# Training
+##########
+
+# The desired size of the image.
+preprocess.img_height = 256
+preprocess.img_width = 256
+
+# Choose one of: @Adam(), @AdamW(), @SGD(), ...
+# Make sure to choose the correct parameters of the optimizer
+Trainer.optimizer = @Supervised/Adam()
+Supervised/Adam.learning_rate = 1e-4
+cGANTrainer.optimizer_gen = @cGAN_gen/Adam()
+cGANTrainer.optimizer_disc = @cGAN_disc/Adam()
+cGAN_gen/Adam.learning_rate = 1e-4
+cGAN_gen/Adam.beta_1 = 0.8
+cGAN_disc/Adam.learning_rate = 3e-5
+cGAN_disc/Adam.beta_1 = 0.5
+
+Trainer.total_steps = 5e6
+Trainer.log_interval = 1e3
+Trainer.ckpt_interval = 2e4
+
+cGANTrainer.lambda_weighted_l1_loss = 50
+cGANTrainer.total_steps = 10e6
+cGANTrainer.log_interval = 5e2
+cGANTrainer.ckpt_interval = 2e4
+
+# If the training should continue from a checkpoint: Give the checkpoint directory.
+# Specified model and the checkpoint need to match.
+Trainer.ckpt_path = None
+cGANTrainer.ckpt_path = None
